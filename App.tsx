@@ -17,7 +17,8 @@ import {
   TrashIcon,
   PlusIcon,
   XMarkIcon,
-  PhotoIcon
+  PhotoIcon,
+  HomeIcon
 } from '@heroicons/react/24/solid';
 
 // --- Types ---
@@ -69,27 +70,27 @@ interface Token {
 
 const PROPERTIES: Property[] = [
   // PURPLE
-  { id: 0, name: "Ben Hill", price: 60, rent: [2, 10, 30, 90, 160, 250], group: 'PURPLE', owner: null, level: 0 },
-  { id: 1, name: "Adamsville", price: 60, rent: [4, 20, 60, 180, 320, 450], group: 'PURPLE', owner: null, level: 0 },
+  { id: 0, name: "Ben Hill", price: 60, rent: [2, 10, 30, 90, 160, 250], group: 'PURPLE', owner: null, level: 0, description: "It's a start. Every empire starts somewhere. Usually here. Own both Purples for a 'Run the Block' bonus." },
+  { id: 1, name: "Adamsville", price: 60, rent: [4, 20, 60, 180, 320, 450], group: 'PURPLE', owner: null, level: 0, image: "/adamsville.png", description: "The hustle continues. A solid investment, just don't ask what's sold out back." },
   // LIGHT BLUE
-  { id: 2, name: "Campton Road", price: 100, rent: [6, 30, 90, 270, 400, 550], group: 'LIGHT_BLUE', owner: null, level: 0 },
-  { id: 3, name: "Camp Creek", price: 100, rent: [6, 30, 90, 270, 400, 550], group: 'LIGHT_BLUE', owner: null, level: 0 },
-  { id: 4, name: "SWATS", price: 120, rent: [8, 40, 100, 300, 450, 600], group: 'LIGHT_BLUE', owner: null, level: 0 },
+  { id: 2, name: "Campton Road", price: 100, rent: [6, 30, 90, 270, 400, 550], group: 'LIGHT_BLUE', owner: null, level: 0, image: "/campton_road.png", description: "Watch out for that pothole. Close enough to get where you're going, far enough to mind your business." },
+  { id: 3, name: "Camp Creek", price: 100, rent: [6, 30, 90, 270, 400, 550], group: 'LIGHT_BLUE', owner: null, level: 0, image: "/camp_creek.png", description: "Every store you could ever want. Traffic is crazy, but at least you can get some new Js and a Cinnabon in the same trip." },
+  { id: 4, name: "SWATS", price: 120, rent: [8, 40, 100, 300, 450, 600], group: 'LIGHT_BLUE', owner: null, level: 0, image: "/swats.png", description: "Southwest Atlanta, Too Strong. Home of legends. Respect is earned, not given." },
   // PINK
-  { id: 5, name: "Edgewood", price: 140, rent: [10, 50, 150, 450, 625, 750], group: 'PINK', owner: null, level: 0 },
-  { id: 6, name: "Cabbagetown", price: 140, rent: [10, 50, 150, 450, 625, 750], group: 'PINK', owner: null, level: 0 },
-  { id: 7, name: "Old 4th Ward", price: 160, rent: [12, 60, 180, 500, 700, 900], group: 'PINK', owner: null, level: 0 },
+  { id: 5, name: "Edgewood", price: 140, rent: [10, 50, 150, 450, 625, 750], group: 'PINK', owner: null, level: 0, image: "/edgewood.png", description: "Bar hopping central. Good vibes, good music, and someone's always getting into a fight." },
+  { id: 6, name: "Cabbagetown", price: 140, rent: [10, 50, 150, 450, 625, 750], group: 'PINK', owner: null, level: 0, image: "/cabbagetown.png", description: "Where the murals are brighter than your future. Used to be mills, now it's all art and expensive coffee." },
+  { id: 7, name: "Old 4th Ward", price: 160, rent: [12, 60, 180, 500, 700, 900], group: 'PINK', owner: null, level: 0, image: "/old_4th_ward.png", description: "History on every corner. From MLK to the BeltLine, this place has seen it all." },
   // ORANGE
-  { id: 8, name: "Mechanicsville", price: 180, rent: [14, 70, 200, 550, 750, 950], group: 'ORANGE', owner: null, level: 0 },
-  { id: 9, name: "Pittsburgh", price: 180, rent: [14, 70, 200, 550, 750, 950], group: 'ORANGE', owner: null, level: 0 },
-  { id: 10, name: "Peoplestown", price: 200, rent: [16, 80, 220, 600, 800, 1000], group: 'ORANGE', owner: null, level: 0 },
+  { id: 8, name: "Mechanicsville", price: 180, rent: [14, 70, 200, 550, 750, 950], group: 'ORANGE', owner: null, level: 0, image: "/mechanicsville.png", description: "The OG suburbs. Rich history, even richer characters. You'll see a little bit of everything here." },
+  { id: 9, name: "Pittsburgh", price: 180, rent: [14, 70, 200, 550, 750, 950], group: 'ORANGE', owner: null, level: 0, image: "/pittsburgh.png", description: "Not the one in Pennsylvania. Gritty, resilient, and on the come up. Don't sleep on Pittsburgh." },
+  { id: 10, name: "Peoplestown", price: 200, rent: [16, 80, 220, 600, 800, 1000], group: 'ORANGE', owner: null, level: 0, image: "/peoplestown.png", description: "It's for the people. Home to the greats and not-so-greats. A true Atlanta mix." },
   // RED
-  { id: 11, name: "Bankhead", price: 220, rent: [18, 90, 250, 700, 875, 1050], group: 'RED', owner: null, level: 0 },
-  { id: 12, name: "Bowen Homes", price: 220, rent: [18, 90, 250, 700, 875, 1050], group: 'RED', owner: null, level: 0 },
-  { id: 13, name: "Simpson Road", price: 240, rent: [20, 100, 300, 750, 925, 1100], group: 'RED', owner: null, level: 0 },
+  { id: 11, name: "Bankhead", price: 220, rent: [18, 90, 250, 700, 875, 1050], group: 'RED', owner: null, level: 0, image: "/bankhead.png", description: "You can get anything you want. From the flea market to the club, Bankhead's got it all. Just watch your back." },
+  { id: 12, name: "Bowen Homes", price: 220, rent: [18, 90, 250, 700, 875, 1050], group: 'RED', owner: null, level: 0, image: "/bowen_homes.png", description: "Gone but not forgotten. A legendary name that still rings out. A tribute to the real ones." },
+  { id: 13, name: "Simpson Road", price: 240, rent: [20, 100, 300, 750, 925, 1100], group: 'RED', owner: null, level: 0, image: "/simpson_road.png", description: "If you know, you know. This street has stories. Most of 'em you don't wanna hear." },
   // YELLOW
-  { id: 14, name: "College Park", price: 260, rent: [22, 110, 330, 800, 975, 1150], group: 'YELLOW', owner: null, level: 0 },
-  { id: 15, name: "Riverdale", price: 260, rent: [22, 110, 330, 800, 975, 1150], group: 'YELLOW', owner: null, level: 0 },
+  { id: 14, name: "College Park", price: 260, rent: [22, 110, 330, 800, 975, 1150], group: 'YELLOW', owner: null, level: 0, image: "/college_park.png", description: "Home of the fly. If you're not from here, you probably flew over it. More than just an airport." },
+  { id: 15, name: "Riverdale", price: 260, rent: [22, 110, 330, 800, 975, 1150], group: 'YELLOW', owner: null, level: 0, image: "/riverdale.png", description: "Southside's finest. Good food, better stories. A whole vibe." },
   { 
     id: 16, 
     name: "Forest Park", 
@@ -99,24 +100,24 @@ const PROPERTIES: Property[] = [
     owner: null, 
     level: 0,
     // TIP: To use your own image, convert it to Base64 (data:image/jpeg;base64,...) and paste it here
-    image: "https://images.unsplash.com/photo-1560529178-855d6eb5ad84?q=80&w=800&auto=format&fit=crop", 
+    image: "/forest_park.png", 
     description: "Known for the State Farmers Market and its rich railroad history. A hidden gem with easy access to everything south of the perimeter."
   },
   // GREEN
-  { id: 17, name: "EAV", price: 300, rent: [26, 130, 390, 900, 1100, 1275], group: 'GREEN', owner: null, level: 0 },
-  { id: 18, name: "Gresham Road", price: 300, rent: [26, 130, 390, 900, 1100, 1275], group: 'GREEN', owner: null, level: 0 },
-  { id: 19, name: "Glenwood", price: 320, rent: [28, 150, 450, 1000, 1200, 1400], group: 'GREEN', owner: null, level: 0 },
+  { id: 17, name: "EAV", price: 300, rent: [26, 130, 390, 900, 1100, 1275], group: 'GREEN', owner: null, level: 0, image: "/eav.png", description: "East Atlanta Village, stay weird. Tattoos, street art, and dive bars. What more do you need?" },
+  { id: 18, name: "Gresham Road", price: 300, rent: [26, 130, 390, 900, 1100, 1275], group: 'GREEN', owner: null, level: 0, image: "/gresham_road.png", description: "Connects everything, belongs to nothing. You've driven down it a thousand times, but have you ever stopped?" },
+  { id: 19, name: "Glenwood", price: 320, rent: [28, 150, 450, 1000, 1200, 1400], group: 'GREEN', owner: null, level: 0, image: "/glenwood.png", description: "The gateway to the east. From cookouts to car shows, there's always something happening on Glenwood." },
   // DARK BLUE
-  { id: 20, name: "Zone 6", price: 350, rent: [35, 175, 500, 1100, 1300, 1500], group: 'DARK_BLUE', owner: null, level: 0 },
-  { id: 21, name: "Kirkwood", price: 400, rent: [50, 200, 600, 1400, 1700, 2000], group: 'DARK_BLUE', owner: null, level: 0 },
+  { id: 20, name: "Zone 6", price: 350, rent: [35, 175, 500, 1100, 1300, 1500], group: 'DARK_BLUE', owner: null, level: 0, image: "/zone_6.png", description: "Rep your zone. It's not just a place, it's a mindset. Welcome to the eastside." },
+  { id: 21, name: "Kirkwood", price: 400, rent: [50, 200, 600, 1400, 1700, 2000], group: 'DARK_BLUE', owner: null, level: 0, image: "/kirkwood.png", description: "The new hotness. From quiet streets to packed restaurants, Kirkwood is booming. Get in while you can." },
   // STATIONS
-  { id: 22, name: "Five Points", price: 200, rent: [25, 50, 100, 200, 0, 0], group: 'RAILROAD', owner: null, level: 0 },
-  { id: 23, name: "Airport", price: 200, rent: [25, 50, 100, 200, 0, 0], group: 'RAILROAD', owner: null, level: 0 },
-  { id: 24, name: "West End", price: 200, rent: [25, 50, 100, 200, 0, 0], group: 'RAILROAD', owner: null, level: 0 },
-  { id: 25, name: "Lenox Station", price: 200, rent: [25, 50, 100, 200, 0, 0], group: 'RAILROAD', owner: null, level: 0 },
+  { id: 22, name: "Five Points", price: 200, rent: [30, 75, 150, 250, 0, 0], group: 'RAILROAD', owner: null, level: 0, image: "/five_points.png", description: "The heart of the system. Everyone passes through here, whether they want to or not." },
+  { id: 23, name: "Airport", price: 200, rent: [30, 75, 150, 250, 0, 0], group: 'RAILROAD', owner: null, level: 0, image: "/airport.png", description: "World's Busiest. You're either leaving or you're coming home. Either way, you're waiting in line." },
+  { id: 24, name: "West End", price: 200, rent: [25, 50, 100, 200, 0, 0], group: 'RAILROAD', owner: null, level: 0, image: "/west_end.png", description: "Rich in culture, rich in soul. Historic and vibrant, the West End is the past and future of Atlanta." },
+  { id: 25, name: "Lenox Station", price: 200, rent: [25, 50, 100, 200, 0, 0], group: 'RAILROAD', owner: null, level: 0, image: "/lenox_station.png", description: "High fashion, higher traffic. Where all the rappers and ballers come to shop. Don't forget where you parked." },
   // UTILITIES
-  { id: 26, name: "GA Power", price: 150, rent: [0, 0, 0, 0, 0, 0], group: 'UTILITY', owner: null, level: 0 },
-  { id: 27, name: "Clayton Water", price: 150, rent: [0, 0, 0, 0, 0, 0], group: 'UTILITY', owner: null, level: 0 },
+  { id: 26, name: "GA Power", price: 150, rent: [0, 0, 0, 0, 0, 0], group: 'UTILITY', owner: null, level: 0, image: "/georgia_power.png", description: "Lights on... for now. If you roll doubles to land here, pay double rent (Surge Pricing). Pray you don't land here in July." },
+  { id: 27, name: "Clayton Water", price: 150, rent: [0, 0, 0, 0, 0, 0], group: 'UTILITY', owner: null, level: 0, image: "/clayton_water.png", description: "It's wet. You need it, you pay for it. Simple as that." },
 ];
 
 // Board Layout Indices (0-39)
@@ -324,7 +325,7 @@ const SetupScreen = ({ onStart }: { onStart: (players: Player[]) => void }) => {
     return (
         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
            {/* Header */}
-           <h1 className="text-4xl md:text-6xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-8 tracking-tighter text-center">
+           <h1 className="text-4xl md:text-6xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-8 text-center px-2">
               WHO PLAYIN'?
            </h1>
 
@@ -493,10 +494,19 @@ const DeedView = ({ property, onClose }: { property: Property, onClose: () => vo
                 </div>
 
                 <div className="p-4 flex-1 text-xs sm:text-sm font-mono space-y-2">
-                    {property.group === 'RAILROAD' || property.group === 'UTILITY' ? (
-                        <div className="text-center py-8">
-                            <p>Rent depends on number of similar properties owned.</p>
+                    {property.group === 'RAILROAD' ? (
+                        <div className="space-y-2">
+                            <div className="flex justify-between"><span>Rent</span><span>${property.rent[0]}</span></div>
+                            <div className="flex justify-between"><span>If 2 Stations are owned</span><span>${property.rent[1]}</span></div>
+                            <div className="flex justify-between"><span>If 3 Stations are owned</span><span>${property.rent[2]}</span></div>
+                            <div className="flex justify-between"><span>If 4 Stations are owned</span><span>${property.rent[3]}</span></div>
                         </div>
+                    ) : property.group === 'UTILITY' ? (
+                      <div className="text-center py-4 space-y-2">
+                          <p>If one utility is owned, rent is 4 times amount shown on dice.</p>
+                          <p>If both utilities are owned, rent is 10 times amount shown on dice.</p>
+                          {property.name === "GA Power" && <p className="font-bold mt-2">SURGE PRICING: If you roll doubles, pay double rent.</p>}
+                      </div>
                     ) : (
                         <>
                             <div className="flex justify-between">
@@ -565,6 +575,17 @@ const TileView = ({ tile, players, properties, currentTurn, onClick }: { tile: T
         onClick={onClick}
         className={`relative flex flex-col items-center justify-between p-1 border ${colorClass} ${playersHere.length > 0 ? 'ring-2 ring-white z-10' : 'opacity-90'} h-full w-full min-h-[60px] rounded-sm text-[9px] sm:text-[10px] select-none cursor-pointer hover:brightness-110 hover:scale-[1.02] transition-all`}
     >
+      {property && (
+        <div className="absolute top-0 left-0 right-0 flex justify-center items-center space-x-0.5 bg-black/20 p-0.5">
+          {property.level < 5 ? (
+            Array(property.level).fill(0).map((_, i) => (
+              <HomeIcon key={i} className="w-2 h-2 text-green-400" />
+            ))
+          ) : (
+            <BuildingOfficeIcon className="w-4 h-4 text-red-500" />
+          )}
+        </div>
+      )}
       {property && (
          <div className={`w-full h-2 sm:h-3 mb-1 rounded-sm opacity-80 ${colorClass.replace('bg-', 'bg-opacity-100 bg-').split(' ')[0]}`}></div>
       )}
@@ -765,7 +786,22 @@ const App: React.FC = () => {
           } else if (property.owner !== playerId) {
               // Pay Rent
               const owner = players.find(p => p.id === property.owner)!;
-              const rent = property.rent[property.level];
+              
+              let rent = 0;
+              if (property.group === 'RAILROAD') {
+                const ownedCount = properties.filter(p => p.group === 'RAILROAD' && p.owner === property.owner).length;
+                rent = property.rent[ownedCount - 1];
+              } else if (property.group === 'UTILITY') {
+                const ownedCount = properties.filter(p => p.group === 'UTILITY' && p.owner === property.owner).length;
+                const rollTotal = dice[0] + dice[1];
+                rent = ownedCount === 1 ? rollTotal * 4 : rollTotal * 10;
+                if (property.name === "GA Power" && dice[0] === dice[1]) {
+                    rent *= 2; // Surge Pricing special rule
+                }
+              } else {
+                rent = property.rent[property.level];
+              }
+
               addLog(`${player.name} pays $${rent} rent to ${owner.name}.`);
               
               updatePlayer(playerId, { money: player.money - rent });
