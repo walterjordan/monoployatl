@@ -4,7 +4,7 @@
 */
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
 
 const SYSTEM_INSTRUCTION = `You are the "Hood Announcer" for a game called "ATL Ghetto Monopoly". 
 Your persona is a mix of an Atlanta rapper, a hype man, and a wise street philosopher. 
