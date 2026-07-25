@@ -4,7 +4,20 @@
 */
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// No key (e.g. the deployed build, where baking a key into the client bundle
+// would leak it) means we skip the API entirely and use canned commentary.
+const API_KEY = process.env.API_KEY;
+const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
+
+const FALLBACKS = [
+  "Standing on business!",
+  "That's a power move.",
+  "Watch your wallet, twin.",
+  "ATL is ruthless.",
+  "We live!",
+];
+
+const randomFallback = () => FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)];
 
 const SYSTEM_INSTRUCTION = `You are the "Hood Announcer" for a game called "ATL Ghetto Monopoly". 
 Your persona is a mix of an Atlanta rapper, a hype man, and a wise street philosopher. 
@@ -25,9 +38,10 @@ export async function getGameCommentary(
   eventName: string, 
   details: string
 ): Promise<string> {
+  if (!ai) return randomFallback();
   try {
     const prompt = `Event: ${eventName}. Details: ${details}. Give me a short, hype, or funny reaction comment.`;
-    
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
@@ -41,14 +55,6 @@ export async function getGameCommentary(
     return response.text || "That's wild, shawty.";
   } catch (error) {
     console.error("Gemini Commentary Error:", error);
-    // Fallback comments if API fails
-    const fallbacks = [
-      "Standing on business!",
-      "That's a power move.",
-      "Watch your wallet, twin.",
-      "ATL is ruthless.",
-      "We live!"
-    ];
-    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    return randomFallback();
   }
 }
