@@ -45,6 +45,7 @@ import {
 } from './game/engine';
 import { PropertyManager } from './components/PropertyManager';
 import { TradeModal, TradeReview, type TradeOffer } from './components/TradeModal';
+import { NetClient, recallRoom, forgetRoom, type LobbyPlayer } from './services/net';
 
 // --- Reusable Components ---
 
@@ -173,10 +174,10 @@ const MoneyBill = () => (
 
 const SetupScreen = ({
   onStart,
-  onResume,
+  onBack,
 }: {
   onStart: (players: Player[]) => void;
-  onResume: (() => void) | null;
+  onBack: () => void;
 }) => {
   const [roster, setRoster] = useState<Player[]>([]);
   const [name, setName] = useState('');
@@ -210,15 +211,9 @@ const SetupScreen = ({
         WHO PLAYIN'?
       </h1>
 
-      {onResume && (
-        <button
-          onClick={onResume}
-          className="mb-8 px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl font-black text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center space-x-2"
-        >
-          <ArrowPathIcon className="w-5 h-5" />
-          <span>RESUME SAVED GAME</span>
-        </button>
-      )}
+      <button onClick={onBack} className="mb-8 text-xs uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
+        &larr; Back to menu
+      </button>
 
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-zinc-900/80 p-6 rounded-xl border border-zinc-800 backdrop-blur-md shadow-2xl">
@@ -351,6 +346,208 @@ const SetupScreen = ({
           </button>
           {roster.length < 2 && (
             <p className="text-center text-xs text-zinc-600 mt-2">Need at least 2 players to start.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MenuScreen = ({
+  onLocal,
+  onCreate,
+  onJoin,
+  onResume,
+  error,
+}: {
+  onLocal: () => void;
+  onCreate: () => void;
+  onJoin: (code: string) => void;
+  onResume: (() => void) | null;
+  error: string;
+}) => {
+  const [joinCode, setJoinCode] = useState('');
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      <h1 className="text-4xl md:text-6xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-2 tracking-tighter text-center px-4 py-2 leading-tight">
+        ATL GHETTO MONOPOLY
+      </h1>
+      <p className="text-zinc-500 text-sm mb-10 uppercase tracking-widest">Fulton County Edition</p>
+
+      <div className="w-full max-w-sm space-y-3">
+        <button
+          onClick={onCreate}
+          className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-black text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          CREATE GAME CODE
+        </button>
+
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={joinCode}
+            onChange={(e) => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4))}
+            placeholder="CODE"
+            className="flex-1 bg-zinc-900 border border-zinc-700 text-white text-center text-2xl font-black tracking-[0.4em] p-3 rounded-xl focus:outline-none focus:border-blue-500 placeholder-zinc-700 uppercase"
+          />
+          <button
+            onClick={() => joinCode.length === 4 && onJoin(joinCode)}
+            disabled={joinCode.length !== 4}
+            className="px-6 py-3 bg-emerald-700 hover:bg-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl font-black transition-colors"
+          >
+            JOIN
+          </button>
+        </div>
+
+        <button
+          onClick={onLocal}
+          className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold text-sm uppercase tracking-wider transition-colors"
+        >
+          Play on this device
+        </button>
+
+        {onResume && (
+          <button
+            onClick={onResume}
+            className="w-full py-3 bg-gradient-to-r from-emerald-700 to-teal-700 rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-[1.01] transition-all flex items-center justify-center space-x-2"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            <span>Resume saved local game</span>
+          </button>
+        )}
+
+        {error && (
+          <p className="text-center text-red-400 text-sm bg-red-950/40 border border-red-900 rounded-lg py-2 px-3">{error}</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const LobbyScreen = ({
+  code,
+  seat,
+  lobby,
+  connected,
+  onLockIn,
+  onStart,
+  onLeave,
+}: {
+  code: string;
+  seat: number;
+  lobby: LobbyPlayer[];
+  connected: boolean;
+  onLockIn: (name: string, token: string) => void;
+  onStart: () => void;
+  onLeave: () => void;
+}) => {
+  const [name, setName] = useState('');
+  const [tokenIdx, setTokenIdx] = useState<number | null>(null);
+  const me = lobby.find((l) => l.seat === seat && l.name);
+  const takenTokens = lobby.filter((l) => l.seat !== seat && l.name).map((l) => l.token);
+  const roster = lobby.filter((l) => l.name);
+  const isHost = seat === 0;
+  const canLock = name.trim().length > 0 && tokenIdx !== null;
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      <button onClick={onLeave} className="mb-6 text-xs uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
+        &larr; Leave game
+      </button>
+
+      <div className="text-center mb-8">
+        <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">Share this game code</p>
+        <div className="text-6xl md:text-7xl font-black tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 px-4">
+          {code}
+        </div>
+        <p className="text-xs text-zinc-500 mt-2">
+          Friends open this site and tap JOIN with the code.
+          {!connected && <span className="text-yellow-400 ml-2">Reconnecting...</span>}
+        </p>
+      </div>
+
+      <div className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-zinc-900/80 p-5 rounded-xl border border-zinc-800">
+          <h2 className="text-sm font-bold mb-3 text-blue-400 uppercase tracking-wider">
+            {me ? 'You (locked in)' : 'Pick your player'}
+          </h2>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Street name..."
+            maxLength={12}
+            className="w-full bg-zinc-800 border border-zinc-700 text-white p-3 rounded-lg focus:outline-none focus:border-blue-500 mb-3 placeholder-zinc-600 font-mono"
+          />
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {TOKENS.map((t, i) => {
+              const isTaken = takenTokens.includes(t.name);
+              const isSelected = tokenIdx === i;
+              return (
+                <button
+                  key={i}
+                  disabled={isTaken}
+                  onClick={() => setTokenIdx(i)}
+                  title={t.name}
+                  className={`aspect-square rounded-lg flex items-center justify-center border transition-all p-2 ${
+                    isTaken
+                      ? 'bg-zinc-900 border-zinc-800 opacity-30 cursor-not-allowed'
+                      : isSelected
+                      ? 'bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/50'
+                      : 'bg-zinc-800 border-zinc-700 hover:border-zinc-500'
+                  }`}
+                >
+                  <GamePiece name={t.name} className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-zinc-400'}`} />
+                </button>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => canLock && onLockIn(name.trim(), TOKENS[tokenIdx!].name)}
+            disabled={!canLock}
+            className="w-full py-3 bg-white text-black font-bold rounded-lg hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors uppercase tracking-wide text-sm"
+          >
+            {me ? 'Update player' : 'Lock in'}
+          </button>
+        </div>
+
+        <div className="flex flex-col">
+          <div className="flex-1 bg-zinc-900/50 p-5 rounded-xl border border-zinc-800 mb-4">
+            <h2 className="text-sm font-bold mb-3 text-zinc-400 uppercase tracking-wider flex justify-between">
+              <span>In the room</span>
+              <span className="text-zinc-600">{roster.length}/6</span>
+            </h2>
+            {roster.length === 0 ? (
+              <p className="text-zinc-600 text-sm py-6 text-center">Nobody locked in yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {roster.map((l) => (
+                  <div key={l.seat} className="flex items-center space-x-3 p-2 bg-zinc-800 rounded-lg border border-zinc-700">
+                    <div className="w-8 h-8 p-1 bg-black/50 rounded-full">
+                      <GamePiece name={l.token} className="w-full h-full text-white" />
+                    </div>
+                    <span className="font-bold">{l.name}</span>
+                    {l.seat === 0 && <span className="text-[9px] uppercase text-yellow-400 font-bold">Host</span>}
+                    {l.seat === seat && <span className="text-[9px] uppercase text-blue-400 font-bold">You</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {isHost ? (
+            <button
+              onClick={onStart}
+              disabled={roster.length < 2}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-black text-xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center space-x-2"
+            >
+              <span>START GAME</span>
+              <PlayIcon className="w-6 h-6" />
+            </button>
+          ) : (
+            <div className="w-full py-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center text-zinc-500 text-sm uppercase tracking-widest">
+              Waiting for the host to start...
+            </div>
           )}
         </div>
       </div>
@@ -636,10 +833,138 @@ const App: React.FC = () => {
 
   const [savedGame, setSavedGame] = useState<SavedGame | null>(readSavedGame);
 
+  // Online play (game-code multiplayer)
+  const [screen, setScreen] = useState<'menu' | 'local' | 'lobby'>('menu');
+  const [online, setOnline] = useState<{ code: string; seat: number } | null>(null);
+  const [lobby, setLobby] = useState<LobbyPlayer[]>([]);
+  const [netError, setNetError] = useState('');
+  const [connected, setConnected] = useState(true);
+  const netRef = useRef<NetClient | null>(null);
+  const applyingRemote = useRef(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Snapshot the game at stable phases so a refresh doesn't kill an hour-long game.
+  // ---------------------------------------------------------------------------
+  // Online sync: whoever acts publishes the full snapshot; everyone else applies.
+  // ---------------------------------------------------------------------------
+
+  const applySnapshot = (s: any) => {
+    applyingRemote.current = true;
+    setPlayers(s.players);
+    setProperties(s.properties);
+    setCurrentPlayerIndex(s.currentPlayerIndex);
+    setGameLog(s.gameLog ?? []);
+    setDice(s.dice ?? [1, 1]);
+    setDoublesCount(s.doublesCount ?? 0);
+    setExtraTurn(s.extraTurn ?? false);
+    setPhase(s.phase);
+    setDecks(s.decks ?? freshDecks());
+    setDebt(s.debt ?? null);
+    setPendingPropertyId(s.pendingPropertyId ?? null);
+    setPendingCard(s.pendingCard ?? null);
+    setPendingOffer(s.pendingOffer ?? null);
+    setWinner(s.winnerId != null ? s.players.find((p: Player) => p.id === s.winnerId) ?? null : null);
+    setGameStarted(true);
+  };
+
+  const startNet = (kind: 'create' | 'join', code?: string, seat?: number) => {
+    setNetError('');
+    netRef.current?.close();
+    const net = new NetClient({
+      onJoined: (info) => {
+        setOnline({ code: info.code, seat: info.seat });
+        setLobby(info.lobby);
+        if (info.snapshot) {
+          applySnapshot(info.snapshot);
+        } else {
+          setScreen('lobby');
+        }
+      },
+      onLobby: setLobby,
+      onState: (s) => applySnapshot(s),
+      onError: (e) => {
+        setNetError(e);
+        setScreen('menu');
+        forgetRoom();
+      },
+      onConnectionChange: setConnected,
+    });
+    netRef.current = net;
+    if (kind === 'create') net.createRoom();
+    else net.joinRoom(code!, seat);
+  };
+
+  // Refresh mid-online-game: rejoin our seat automatically.
   useEffect(() => {
+    const saved = recallRoom();
+    if (saved) startNet('join', saved.code, saved.seat);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Publish every locally-originated change. Remote applies consume the flag so
+  // they never echo back. Only actors mutate state locally (controls are gated),
+  // so this cannot ping-pong.
+  useEffect(() => {
+    if (!online || !gameStarted) return;
+    if (applyingRemote.current) {
+      applyingRemote.current = false;
+      return;
+    }
+    netRef.current?.publish({
+      players,
+      properties,
+      currentPlayerIndex,
+      gameLog: gameLog.slice(-100),
+      dice,
+      doublesCount,
+      extraTurn,
+      phase,
+      decks,
+      debt,
+      pendingPropertyId,
+      pendingCard,
+      pendingOffer,
+      winnerId: winner?.id ?? null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [players, properties, currentPlayerIndex, gameLog, dice, doublesCount, extraTurn, phase, decks, debt, pendingPropertyId, pendingCard, pendingOffer, winner]);
+
+  const startOnlineGame = () => {
+    const roster = lobby.filter((l) => l.name);
+    if (roster.length < 2) return;
+    const newPlayers: Player[] = roster.map((l, i) => ({
+      id: l.seat,
+      name: l.name,
+      token: l.token,
+      money: STARTING_MONEY,
+      position: 0,
+      inJail: false,
+      jailTurns: 0,
+      getOutOfJailCards: 0,
+      bankrupt: false,
+      color: PLAYER_COLORS[i % PLAYER_COLORS.length],
+    }));
+    setPlayers(newPlayers);
+    setProperties(PROPERTIES.map((p) => ({ ...p })));
+    setDecks(freshDecks());
+    setCurrentPlayerIndex(0);
+    setGameLog(['Welcome to ATL Ghetto Monopoly!']);
+    setGameStarted(true);
+    setPhase('idle');
+  };
+
+  const leaveOnline = () => {
+    netRef.current?.close();
+    netRef.current = null;
+    setOnline(null);
+    setLobby([]);
+    setScreen('menu');
+  };
+
+  // Snapshot the game at stable phases so a refresh doesn't kill an hour-long game.
+  // (Local games only; online games live on the server keyed by the room code.)
+  useEffect(() => {
+    if (online) return;
     if (!gameStarted || winner) return;
     if (phase !== 'idle' && phase !== 'turnEnd') return;
     const snapshot: SavedGame = {
@@ -658,15 +983,15 @@ const App: React.FC = () => {
     } catch {
       // Storage full/blocked: play on without persistence.
     }
-  }, [gameStarted, winner, phase, players, properties, currentPlayerIndex, gameLog, dice, doublesCount, extraTurn, decks]);
+  }, [online, gameStarted, winner, phase, players, properties, currentPlayerIndex, gameLog, dice, doublesCount, extraTurn, decks]);
 
   useEffect(() => {
-    if (winner) {
+    if (winner && !online) {
       try {
         localStorage.removeItem(SAVE_KEY);
       } catch {}
     }
-  }, [winner]);
+  }, [winner, online]);
 
   const resumeSavedGame = () => {
     if (!savedGame) return;
@@ -1346,23 +1671,47 @@ const App: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   if (!gameStarted) {
+    if (screen === 'local') {
+      return (
+        <SetupScreen
+          onBack={() => setScreen('menu')}
+          onStart={(p) => {
+            // Re-assign ids/colors sequentially: removing then re-adding players in
+            // setup can otherwise create duplicate ids, which corrupts ownership.
+            setPlayers(p.map((pl, i) => ({ ...pl, id: i, color: PLAYER_COLORS[i % PLAYER_COLORS.length] })));
+            setProperties(PROPERTIES.map((prop) => ({ ...prop })));
+            setDecks(freshDecks());
+            setGameLog(['Welcome to ATL Ghetto Monopoly!']);
+            setSavedGame(null);
+            try {
+              localStorage.removeItem(SAVE_KEY);
+            } catch {}
+            setGameStarted(true);
+            setPhase('idle');
+          }}
+        />
+      );
+    }
+    if (screen === 'lobby' && online) {
+      return (
+        <LobbyScreen
+          code={online.code}
+          seat={online.seat}
+          lobby={lobby}
+          connected={connected}
+          onLockIn={(name, token) => netRef.current?.sendLobby(name, token)}
+          onStart={startOnlineGame}
+          onLeave={leaveOnline}
+        />
+      );
+    }
     return (
-      <SetupScreen
+      <MenuScreen
+        onLocal={() => setScreen('local')}
+        onCreate={() => startNet('create')}
+        onJoin={(code) => startNet('join', code)}
         onResume={savedGame ? resumeSavedGame : null}
-        onStart={(p) => {
-          // Re-assign ids/colors sequentially: removing then re-adding players in
-          // setup can otherwise create duplicate ids, which corrupts ownership.
-          setPlayers(p.map((pl, i) => ({ ...pl, id: i, color: PLAYER_COLORS[i % PLAYER_COLORS.length] })));
-          setProperties(PROPERTIES.map((prop) => ({ ...prop })));
-          setDecks(freshDecks());
-          setGameLog(['Welcome to ATL Ghetto Monopoly!']);
-          setSavedGame(null);
-          try {
-            localStorage.removeItem(SAVE_KEY);
-          } catch {}
-          setGameStarted(true);
-          setPhase('idle');
-        }}
+        error={netError}
       />
     );
   }
@@ -1378,6 +1727,7 @@ const App: React.FC = () => {
             try {
               localStorage.removeItem(SAVE_KEY);
             } catch {}
+            forgetRoom();
             window.location.reload();
           }}
           className="mt-8 px-6 py-2 bg-blue-600 rounded-full hover:bg-blue-500"
@@ -1391,6 +1741,8 @@ const App: React.FC = () => {
   const currentPlayer = players[currentPlayerIndex];
   const pendingProperty =
     pendingPropertyId !== null ? properties.find((p) => p.id === pendingPropertyId) : null;
+  // Online: only the player whose turn it is gets interactive controls.
+  const myTurn = !online || currentPlayer?.id === online.seat;
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden flex flex-col md:flex-row">
@@ -1405,6 +1757,18 @@ const App: React.FC = () => {
               Season 1
             </span>
             <span className="text-[10px] text-zinc-500">Fulton County Edition</span>
+            {online && (
+              <span
+                className={`px-2 py-0.5 text-[10px] rounded border uppercase tracking-wider font-bold ${
+                  connected
+                    ? 'bg-emerald-900/50 text-emerald-300 border-emerald-800'
+                    : 'bg-yellow-900/50 text-yellow-300 border-yellow-800 animate-pulse'
+                }`}
+                title={connected ? 'Connected' : 'Reconnecting...'}
+              >
+                {connected ? `Code ${online.code}` : 'Reconnecting'}
+              </span>
+            )}
           </div>
         </div>
 
@@ -1506,6 +1870,17 @@ const App: React.FC = () => {
             </div>
           </div>
 
+          {online && !myTurn ? (
+            <div className="w-full py-6 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+              <div className="text-sm uppercase tracking-widest text-zinc-400">
+                Waiting on <span className="text-white font-bold">{currentPlayer?.name}</span>
+              </div>
+              <div className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">
+                {phase === 'debt' ? 'They owe money and are raising cash...' : 'Their move'}
+              </div>
+            </div>
+          ) : (
+            <>
           {phase === 'idle' && (
             <>
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -1648,6 +2023,8 @@ const App: React.FC = () => {
               )}
             </button>
           )}
+            </>
+          )}
         </div>
       </div>
 
@@ -1725,6 +2102,9 @@ const App: React.FC = () => {
                       {phase === 'cardDraw' && (
                         <span className="text-purple-400">Drawing a card</span>
                       )}
+                      {phase === 'debt' && (
+                        <span className="text-red-400">Raising cash to cover a debt</span>
+                      )}
                       {phase === 'turnEnd' && (
                         <span className="text-emerald-400">
                           {extraTurn ? 'Roll again next' : 'Pass control'}
@@ -1755,7 +2135,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Buy Modal */}
-      <Modal isOpen={phase === 'buying'} title="Property for Sale" onClose={passProperty}>
+      <Modal isOpen={phase === 'buying' && myTurn} title="Property for Sale" onClose={passProperty}>
         <div className="text-center">
           <div className="w-16 h-16 mx-auto bg-zinc-800 rounded-lg mb-4 flex items-center justify-center">
             <BuildingOfficeIcon className="w-8 h-8 text-green-400" />
@@ -1791,12 +2171,18 @@ const App: React.FC = () => {
           <div className="bg-zinc-800 rounded-lg p-6 mb-6 border border-zinc-700">
             <p className="text-lg text-white italic">"{pendingCard?.card.text}"</p>
           </div>
-          <button
-            onClick={acknowledgeCard}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded font-bold"
-          >
-            Continue
-          </button>
+          {myTurn ? (
+            <button
+              onClick={acknowledgeCard}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded font-bold"
+            >
+              Continue
+            </button>
+          ) : (
+            <div className="w-full py-3 text-zinc-500 text-sm uppercase tracking-widest">
+              Waiting on {currentPlayer?.name}...
+            </div>
+          )}
         </div>
       </Modal>
 
@@ -1824,13 +2210,15 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Trade Review (recipient confirms) */}
-      {pendingOffer && (
+      {/* Trade Review: hotseat shows it to everyone (pass the laptop); online only
+          the recipient sees it and decides on their own screen. */}
+      {pendingOffer && (!online || pendingOffer.toPlayerId === online.seat) && (
         <TradeReview
           offer={pendingOffer}
           fromPlayer={players.find((p) => p.id === pendingOffer.fromPlayerId)!}
           toPlayer={players.find((p) => p.id === pendingOffer.toPlayerId)!}
           properties={properties}
+          handoff={!online}
           onAccept={handleTradeAccept}
           onReject={handleTradeReject}
         />

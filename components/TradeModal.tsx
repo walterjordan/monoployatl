@@ -243,6 +243,8 @@ interface TradeReviewProps {
   fromPlayer: Player;
   toPlayer: Player;
   properties: Property[];
+  /** true in hotseat (show "pass the laptop"); false online (recipient's own screen). */
+  handoff?: boolean;
   onAccept: () => void;
   onReject: () => void;
 }
@@ -256,6 +258,7 @@ export const TradeReview: React.FC<TradeReviewProps> = ({
   fromPlayer,
   toPlayer,
   properties,
+  handoff = true,
   onAccept,
   onReject,
 }) => {
@@ -270,7 +273,7 @@ export const TradeReview: React.FC<TradeReviewProps> = ({
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="bg-gradient-to-r from-blue-700 to-purple-700 px-4 py-4 text-center">
           <div className="text-xs uppercase font-bold text-white/70 tracking-widest">
-            Pass the laptop to
+            {handoff ? 'Pass the laptop to' : 'Trade offer for'}
           </div>
           <div className="text-2xl font-black text-white mt-1">{toPlayer.name}</div>
         </div>
