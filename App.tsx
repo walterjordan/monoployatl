@@ -206,7 +206,7 @@ const SetupScreen = ({
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl md:text-6xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-8 tracking-tighter text-center">
+      <h1 className="text-4xl md:text-6xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-8 tracking-tighter text-center px-4 py-2 leading-tight">
         WHO PLAYIN'?
       </h1>
 
@@ -671,7 +671,16 @@ const App: React.FC = () => {
   const resumeSavedGame = () => {
     if (!savedGame) return;
     setPlayers(savedGame.players);
-    setProperties(savedGame.properties);
+    // Only dynamic fields come from the save; static data (images, rents, names)
+    // always comes from current code so saves survive content updates.
+    setProperties(
+      PROPERTIES.map((base) => {
+        const saved = savedGame.properties.find((p) => p.id === base.id);
+        return saved
+          ? { ...base, owner: saved.owner, level: saved.level, mortgaged: saved.mortgaged }
+          : { ...base };
+      }),
+    );
     setCurrentPlayerIndex(savedGame.currentPlayerIndex);
     setGameLog([...savedGame.gameLog, 'Game resumed from save.']);
     setDice(savedGame.dice);
@@ -1388,7 +1397,7 @@ const App: React.FC = () => {
       {/* Left Panel: Controls & Stats */}
       <div className="w-full md:w-80 flex-shrink-0 bg-zinc-900/80 border-r border-zinc-800 p-4 flex flex-col gap-4 z-20 backdrop-blur-md">
         <div className="mb-2">
-          <h1 className="text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+          <h1 className="text-xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 pr-2">
             ATL GHETTO MONOPOLY
           </h1>
           <div className="flex items-center space-x-2 mt-1">

@@ -30,6 +30,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/ben_hill.jpg',
   },
   {
     id: 1,
@@ -67,6 +68,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/camp_creek.jpg',
   },
   {
     id: 4,
@@ -78,6 +80,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/swats.jpg',
   },
 
   // PINK
@@ -91,6 +94,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/edgewood.jpg',
   },
   {
     id: 6,
@@ -102,6 +106,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/cabbagetown.jpg',
   },
   {
     id: 7,
@@ -113,6 +118,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/old_4th_ward.jpg',
   },
 
   // ORANGE
@@ -126,6 +132,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/mechanicsville.jpg',
   },
   {
     id: 9,
@@ -137,6 +144,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/pittsburgh.jpg',
   },
   {
     id: 10,
@@ -148,6 +156,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/peoplestown.jpg',
   },
 
   // RED
@@ -185,6 +194,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/simpson_road.jpg',
   },
 
   // YELLOW
@@ -198,6 +208,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/college_park.jpg',
   },
   {
     id: 15,
@@ -209,6 +220,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/riverdale.jpg',
   },
   {
     id: 16,
@@ -236,6 +248,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/eav.jpg',
   },
   {
     id: 18,
@@ -247,6 +260,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/gresham_road.jpg',
   },
   {
     id: 19,
@@ -258,6 +272,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/glenwood.jpg',
   },
 
   // DARK BLUE
@@ -271,6 +286,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/zone_6.jpg',
   },
   {
     id: 21,
@@ -282,6 +298,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/kirkwood.jpg',
   },
 
   // RAILROADS — rent[0..3] = 1/2/3/4 owned
@@ -319,6 +336,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/west_end.jpg',
   },
   {
     id: 25,
@@ -330,6 +348,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/lenox_station.jpg',
   },
 
   // UTILITIES — rent computed from dice total at runtime
@@ -343,6 +362,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/ga_power.jpg',
   },
   {
     id: 27,
@@ -354,6 +374,7 @@ export const PROPERTIES: Property[] = [
     owner: null,
     level: 0,
     mortgaged: false,
+    image: '/clayton_water.jpg',
   },
 ];
 
